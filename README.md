@@ -1,93 +1,80 @@
-# CodeIgniter 4 Development
+# Running System Tests
 
-[![Build Status](https://github.com/codeigniter4/CodeIgniter4/workflows/PHPUnit/badge.svg)](https://github.com/codeigniter4/CodeIgniter4/actions?query=workflow%3A%22PHPUnit%22)
-[![Coverage Status](https://coveralls.io/repos/github/codeigniter4/CodeIgniter4/badge.svg?branch=develop)](https://coveralls.io/github/codeigniter4/CodeIgniter4?branch=develop)
-[![Downloads](https://poser.pugx.org/codeigniter4/framework/downloads)](https://packagist.org/packages/codeigniter4/framework)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/codeigniter4/CodeIgniter4)](https://packagist.org/packages/codeigniter4/framework)
-[![GitHub stars](https://img.shields.io/github/stars/codeigniter4/CodeIgniter4)](https://packagist.org/packages/codeigniter4/framework)
-[![GitHub license](https://img.shields.io/github/license/codeigniter4/CodeIgniter4)](https://github.com/codeigniter4/CodeIgniter4/blob/develop/LICENSE)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/codeigniter4/CodeIgniter4/pulls)
-<br>
+This is the quick-start to CodeIgniter testing. Its intent is to describe what 
+it takes to set up your system and get it ready to run unit tests. 
+It is not intended to be a full description of the test features that you can 
+use to test your application. Those details can be found in the documentation. 
 
-## What is CodeIgniter?
+## Requirements
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](http://codeigniter.com).
+It is recommended to use the latest version of PHPUnit. At the time of this 
+writing we are running version 9.x. Support for this has been built into the 
+**composer.json** file that ships with CodeIgniter and can easily be installed 
+via [Composer](https://getcomposer.org/) if you don't already have it installed globally.
 
-This repository holds the source code for CodeIgniter 4 only.
-Version 4 is a complete rewrite to bring the quality and the code into a more modern version,
-while still keeping as many of the things intact that has made people love the framework over the years.
+	> composer install
 
-More information about the plans for version 4 can be found in [the announcement](http://forum.codeigniter.com/thread-62615.html) on the forums.
+If running under OS X or Linux, you can create a symbolic link to make running tests a touch nicer.
 
-### Documentation
+	> ln -s ./vendor/bin/phpunit ./phpunit
 
-The [User Guide](https://codeigniter4.github.io/userguide/) is the primary documentation for CodeIgniter 4.
+You also need to install [XDebug](https://xdebug.org/index.php) in order
+for code coverage to be calculated successfully.
 
-The current **in-progress** User Guide can be found [here](https://codeigniter4.github.io/CodeIgniter4/).
-As with the rest of the framework, it is a work in progress, and will see changes over time to structure, explanations, etc.
+## Setting Up
 
-You might also be interested in the [API documentation](https://codeigniter4.github.io/api/) for the framework components.
+A number of the tests use a running database. 
+In order to set up the database edit the details for the `tests` group in 
+**app/Config/Database.php** or **phpunit.xml**. Make sure that you provide a database engine 
+that is currently running on your machine. More details on a test database setup are in the 
+[Testing Your Database](https://codeigniter.com/user_guide/testing/database.html) section of the documentation.
 
-## Important Change with index.php
+If you want to run the tests without using live database you can 
+exclude `@DatabaseLive` group. Or make a copy of **phpunit.dist.xml** - 
+call it **phpunit.xml** - and comment out the `<testsuite>` named `Database`. This will make
+the tests run quite a bit faster.
 
-index.php is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+## Running the tests
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+The entire test suite can be run by simply typing one command-line command from the main directory.
 
-**Please** read the user guide for a better explanation of how CI4 works!
+	> ./phpunit
 
-## Repository Management
+You can limit tests to those within a single test directory by specifying the 
+directory name after phpunit. All core tests are stored under **tests/system**.
 
-CodeIgniter is developed completely on a volunteer basis. As such, please give up to 7 days
-for your issues to be reviewed. If you haven't heard from one of the team in that time period,
-feel free to leave a comment on the issue so that it gets brought back to our attention.
+	> ./phpunit tests/system/HTTP/
 
-We use GitHub issues to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+Individual tests can be run by including the relative path to the test file.
 
-If you raise an issue here that pertains to support or a feature request, it will
-be closed! If you are not sure if you have found a bug, raise a thread on the forum first -
-someone else may have encountered the same thing.
+	> ./phpunit tests/system/HTTP/RequestTest.php
 
-Before raising a new GitHub issue, please check that your bug hasn't already
-been reported or fixed.
+You can run the tests without running the live database and the live cache tests.
 
-We use pull requests (PRs) for CONTRIBUTIONS to the repository.
-We are looking for contributions that address one of the reported bugs or
-approved work packages.
+	> ./phpunit --exclude-group DatabaseLive,CacheLive
 
-Do not use a PR as a form of feature request.
-Unsolicited contributions will only be considered if they fit nicely
-into the framework roadmap.
-Remember that some components that were part of CodeIgniter 3 are being moved
-to optional packages, with their own repository.
+## Generating Code Coverage
 
-## Contributing
+To generate coverage information, including HTML reports you can view in your browser, 
+you can use the following command: 
 
-We **are** accepting contributions from the community!
+	> ./phpunit --colors --coverage-text=tests/coverage.txt --coverage-html=tests/coverage/ -d memory_limit=1024m
 
-Please read the [*Contributing to CodeIgniter*](https://github.com/codeigniter4/CodeIgniter4/blob/develop/contributing/README.md).
+This runs all of the tests again collecting information about how many lines, 
+functions, and files are tested. It also reports the percentage of the code that is covered by tests. 
+It is collected in two formats: a simple text file that provides an overview as well 
+as a comprehensive collection of HTML files that show the status of every line of code in the project. 
 
-## Server Requirements
+The text file can be found at **tests/coverage.txt**. 
+The HTML files can be viewed by opening **tests/coverage/index.html** in your favorite browser.
 
-PHP version 7.3 or higher is required, with the following extensions installed:
+## PHPUnit XML Configuration
 
+The repository has a ``phpunit.xml.dist`` file in the project root that's used for
+PHPUnit configuration. This is used to provide a default configuration if you
+do not have your own configuration file in the project root.
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
-
-Additionally, make sure that the following extensions are enabled in your PHP:
-
-- json (enabled by default - don't turn it off)
-- xml (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php)
-
-## Running CodeIgniter Tests
-
-Information on running the CodeIgniter test suite can be found in the [README.md](tests/README.md) file in the tests directory.
+The normal practice would be to copy ``phpunit.xml.dist`` to ``phpunit.xml``
+(which is git ignored), and to tailor it as you see fit.
+For instance, you might wish to exclude database tests, or automatically generate 
+HTML code coverage reports.
